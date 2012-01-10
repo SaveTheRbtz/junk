@@ -29,6 +29,8 @@ log.setLevel(logging.DEBUG)
 
 def normalize_request(req):
     vectors = []
+    if req == '-':
+        return ['__EMPTY_REQ__']
     try:
         method, url, http = req.split()
         vectors.append('__METHOD_' + method)
@@ -162,7 +164,6 @@ if __name__ == '__main__':
     np.random.shuffle(alldata)
     add_samples_to_training_set(alldata, options.good_file, 0)
     add_samples_to_training_set(alldata, options.bad_file, 1)
-   
     
     log.warning('Preparing data...')
     trndata, tstdata = alldata.splitWithProportion(0.60)
@@ -170,14 +171,17 @@ if __name__ == '__main__':
     for data in [trndata, tstdata]:
         data._convertToOneOfMany()
 
-    tries = 5
-    epochs = 5
+    # TODO(SaveTheRbtz@): Move to OptionParser
+    tries = 10
+    epochs = 10
     verbose = True
+    fast = False
+    bias = True
 
     previous_error = 100
     for _ in xrange(tries):
         log.warning('Constructing NeuralNetwork...')
-        try_fnn = buildNetwork(trndata.indim, trndata.indim, trndata.outdim, hiddenclass=SigmoidLayer, outclass=SoftmaxLayer)
+        try_fnn = buildNetwork(trndata.indim, trndata.indim, trndata.outdim, hiddenclass=SigmoidLayer, outclass=SoftmaxLayer, bias=bias, fast=fast)
 
         log.warning('Training NeuralNetwork...')
         trainer = BackpropTrainer(try_fnn, dataset=trndata, momentum=0.1, verbose=verbose, weightdecay=0.01)
