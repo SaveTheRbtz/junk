@@ -166,7 +166,7 @@ if __name__ == '__main__':
     add_samples_to_training_set(alldata, options.bad_file, 1)
     
     log.warning('Preparing data...')
-    trndata, tstdata = alldata.splitWithProportion(0.60)
+    trndata, tstdata = alldata.splitWithProportion(0.70)
 
     for data in [trndata, tstdata]:
         data._convertToOneOfMany()
@@ -181,7 +181,7 @@ if __name__ == '__main__':
     previous_error = 100
     for _ in xrange(tries):
         log.warning('Constructing NeuralNetwork...')
-        try_fnn = buildNetwork(trndata.indim, trndata.indim, trndata.outdim, hiddenclass=SigmoidLayer, outclass=SoftmaxLayer, bias=bias, fast=fast)
+        try_fnn = buildNetwork(trndata.indim, trndata.indim*2, trndata.outdim, hiddenclass=SigmoidLayer, outclass=SoftmaxLayer, bias=bias, fast=fast)
 
         log.warning('Training NeuralNetwork...')
         trainer = BackpropTrainer(try_fnn, dataset=trndata, momentum=0.1, verbose=verbose, weightdecay=0.01)
