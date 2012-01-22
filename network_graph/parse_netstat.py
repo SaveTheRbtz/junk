@@ -4,7 +4,7 @@
 import re
 import logging
 
-from itertools import chain
+from itertools import chain, groupby
 from collections import namedtuple
 from struct import pack, unpack
 
@@ -41,25 +41,6 @@ class Netstat(object):
     def add_connection(self, connection):
         """Adds connection to set of connections"""
         self.connections.append(connection)
-
-    def group_by_field(self, field, attributes='rx_q tx_q', func=add):
-        """Returns connections grouped by @field using function @func"""
-        groups = dict()
-        for connection in self.connections:
-            field_value = getattr(connection, field)
-            if field_value in groups:
-                for attr in attributes.split():
-                    setattr(groups[field_value], attr, func(getattr(groups[field_value], attr), getattr(connection, attr)))
-            else:
-                groups[field_value] = connection
-        return groups.values()
-
-    def __getattribute__(self, name):
-        """Wrapper for group_by_field methods"""
-        group_by = 'group_by_'
-        if name.startswith(group_by):
-            return partial(object.__getattribute__(self, 'group_by_field'), field=name[len(group_by):])
-        return object.__getattribute__(self, name)
 
 def is_normal_connection(connection):
     """Returns True if connection looks ok, False otherwise"""
@@ -115,8 +96,8 @@ def netstat_to_gdf(netstat):
     nodedef = 'nodedef>name VARCHAR,label VARCHAR,class VARCHAR,dc VARCHAR\n'
     edgedef = 'edgedef>node1 VARCHAR,node2 VARCHAR,directed BOOLEAN,weight DOUBLE\n'
 
-    for connection in netstat.group_by_ip_src():
-        nodedef += '{0},{0},part_of_hostname,DC_from_yasubr\n'.format(connection.ip_src)
+    for key, _ in groupby(sorted(netstat.connections, key=attrgetter('ip_src')), attrgetter('ip_src')):
+        nodedef += '{0},{0},part_of_hostname,DC_from_yasubr\n'.format(key)
     for connection in netstat.connections:
         edgedef += '{0},{1},true,{2}\n'.format(connection.ip_src, connection.ip_dst, connection.rx_q + connection.tx_q)
 
