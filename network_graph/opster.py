@@ -627,7 +627,7 @@ def call_cmd(name, func, opts, middleware=None):
         start = None
         if arginfo.varargs and len(args) > (len(arginfo.args) - len(kwargs)):
             for o in opts:
-                optname = o[1]
+                optname = o[1].replace('-', '_')
                 if optname in arginfo.args:
                     if start is None:
                         start = arginfo.args.index(optname)
