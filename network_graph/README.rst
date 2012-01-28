@@ -3,20 +3,23 @@ Network graph
 
 About
 ~~~~~
-This toolset converts ``netstat -an`` output from different hosts to graph
-which can be processed by programs like `Gephi`_
+This toolset converts ``netstat -an`` output from different hosts to a graph
+which can be processed by programs like `Gephi`_.
 
-``parse_netstat.py`` was written as attempt to prodide useful information about
-Yandex's search cluster. Pretty visualizations are only side effects.
+``parse_netstat.py`` was written in attempt to provide useful information about
+Yandex's search cluster.
+
+Pretty visualizations are only side effects.
 
 .. _Gephi: http://gephi.org/
 
-Examples
-~~~~~~~~
+Examples of usage
+~~~~~~~~~~~~~~~~~
 Simple example::
 
     $ netstat -an > test
     $ ./parse_netstat.py test
+
 
 Or compressed one (currently only bzip2 named pipes are supported)::
 
@@ -28,7 +31,7 @@ Or even bunch of samples::
     $ ./parse_netstat.py <(for i in {0..9}; do netstat -an; done | bzip2)
 
 
-Or as did I, on large number of files obtained via some distributed collector
+Or(as I did) on large number of files obtained via some distributed collector
 (I love `Cocaine`_!)::
 
     $ find stats/ -type f | xargs ./parse_netstat.py
