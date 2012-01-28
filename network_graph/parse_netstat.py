@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 
 import logging
+import socket
 
 from collections import namedtuple, Counter
-import socket
 
 DC = dict()
 # XXX(rbtz@): there is also state here, don't use it for now
@@ -82,28 +82,36 @@ def parse_netstat(lines):
     return netstat
 
 def parse_input(filename):
-    """Function wrapper that opens file, detects type of stats and pass to
-    platform-spicific parser"""
+    """
+    Function wrapper that opens file, detects type of encoding and passes it
+    line-by-line to netstat parser.
+
+    FIXME(SaveTheRbtz@): Make it work with gzipped and plaintext pipes.
+    """
     try:
-        if filename.endswith('.bz2'):
-            from bz2 import BZ2File
-            lines = BZ2File(filename)
+        from gzip import GzipFile
+        from bz2 import BZ2File
+        first_line = ""
+        for func in [BZ2File, GzipFile, open]:
+            try:
+                lines = func(filename)
+                first_line = lines.next()
+                break
+            except:
+                pass
         else:
-            lines = open(filename)
-        first_line = lines.next()
+            logging.error("Can't open file: {0}".format(filename), exc_info=True)
+            return Netstat()
         if first_line.startswith('Active Internet connections'):
-            lines.next()
             return parse_netstat(lines)
         else:
-            logging.warning("Can't determinate netstat type: {0}".format(first_line.strip()))
+            logging.warning("File does not seem to be a ``netstat -an`` output: {0}".format(first_line.strip()))
     except Exception:
-        logging.error("Can't open and parse a file: {0}".format(filename), exc_info=True)
+        logging.error("Can't parse file: {0}".format(filename), exc_info=True)
 
 def group_netstat(netstat):
-    """Computes weights of connections (by simply counting them)"""
-    output = dict()
-    output['edges'] = list()
-    output['nodes'] = set()
+    """Computes weights of connections (simply by counting them)"""
+    output = dict(nodes=set(), edges=list())
     weights = Counter()
 
     for connection in netstat.connections:
