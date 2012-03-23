@@ -17,7 +17,7 @@ Known bugs
 
 Approach dicussion
 ==================
-http://machinelearning.stackexchange.com/questions/63/applying-machine-learning-for-ddos-filtering
+http://stats.stackexchange.com/questions/23488/applying-machine-learning-for-ddos-filtering
 
 Usage
 =====
