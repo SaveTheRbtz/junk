@@ -119,7 +119,7 @@ def features_from_entry(entry):
     return request | refer | useragent | code
 
 
-def vector_from_entry(dictoinary, entry):
+def vector_from_entry(dictionary, entry):
     return np.array([item in features_from_entry(entry) for item in dictionary])
 
 
